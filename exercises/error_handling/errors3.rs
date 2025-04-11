@@ -7,15 +7,20 @@
 // Execute `rustlings hint errors3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
-
 use std::num::ParseIntError;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tokens = 100;
     let pretend_user_input = "8";
 
-    let cost = total_cost(pretend_user_input)?;
+    // `?` 自动调用标准库中的 blanket impl 将任何实现了 std::error::Error trait 的类型转换为 Box<dyn std::error::Error>
+    // 简化示意:
+    // impl<T: Error + 'static> From<T> for Box<dyn Error> {
+    //     fn from(err: T) -> Box<dyn Error> {
+    //         Box::new(err)
+    //     }
+    // }
+    let cost = total_cost(pretend_user_input)?; 
 
     if cost > tokens {
         println!("You can't afford that many!");
@@ -23,6 +28,7 @@ fn main() {
         tokens -= cost;
         println!("You now have {} tokens.", tokens);
     }
+    Ok(())
 }
 
 pub fn total_cost(item_quantity: &str) -> Result<i32, ParseIntError> {
