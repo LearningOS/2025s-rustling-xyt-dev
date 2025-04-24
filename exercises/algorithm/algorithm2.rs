@@ -2,7 +2,6 @@
 	double linked list reverse
 	This problem requires you to reverse a doubly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -64,6 +63,7 @@ impl<T> LinkedList<T> {
     }
 
     fn get_ith_node(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
+        if index < 0 { return None }
         match node {
             None => None,
             Some(next_ptr) => match index {
@@ -74,7 +74,68 @@ impl<T> LinkedList<T> {
     }
 	pub fn reverse(&mut self){
 		// TODO
+        if let (Some(mut l), Some(mut r)) = (self.start, self.end) {
+            loop {
+                if l.as_ptr() == r.as_ptr() {
+                    return
+                }
+                let nextl = unsafe { (*l.as_ptr()).next };
+                let prevr = unsafe { (*r.as_ptr()).prev };
+                // 交换节点
+                unsafe { self.swap(&mut (*l.as_ptr()), &mut (*r.as_ptr())) };
+                if unsafe {!(*r.as_ptr()).next.is_none() && (*r.as_ptr()).next.unwrap().as_ptr() == l.as_ptr()} {
+                    return
+                }
+                // 更新 l 和 r
+                l = nextl.unwrap();
+                r = prevr.unwrap();
+
+            }
+        }
 	}
+    pub unsafe fn swap(&mut self, ref_l: &mut Node<T>, ref_r: &mut Node<T>) { // Safety: must ensure the nodes are in the linked list
+        if ref_l as *mut Node<T> == ref_r as *mut Node<T> {
+            return
+        }
+
+        let prevl = ref_l.prev;
+
+        unsafe { self.extract(ref_l) };
+        unsafe { self.insert(ref_r, ref_l) };
+
+        unsafe { self.extract(ref_r) };
+        if let Some(prevl) = prevl {
+            let ref_prevl = unsafe { &mut *prevl.as_ptr() }; 
+            unsafe { self.insert(ref_prevl, ref_r) };
+        } else {
+            ref_r.next = self.start;
+            ref_r.prev = None;
+            unsafe { (*self.start.unwrap().as_ptr()).prev = Some(NonNull::new_unchecked(ref_r)) };
+            self.start = Some(unsafe { NonNull::new_unchecked(ref_r)});
+        } 
+    }
+    pub unsafe fn extract(&mut self, node: &mut Node<T>) { // Safety: must ensure the node is in the linked list
+        if let Some(prev) = node.prev {
+            unsafe { (*prev.as_ptr()).next = node.next }
+        } else {
+            self.start = node.next;
+        }
+        if let Some(next) = node.next {
+            unsafe { (*next.as_ptr()).prev = node.prev }
+        } else {
+            self.end = node.prev;
+        }
+    }
+    pub unsafe fn insert(&mut self, target_node: &mut Node<T>, node: &mut Node<T>) { // Safety: must ensure the nodes are in the linked list and not the same node
+        node.next = target_node.next;
+        node.prev = unsafe { Some(NonNull::new_unchecked(target_node)) };
+        if let Some(target_next) = target_node.next {
+            unsafe { (*target_next.as_ptr()).prev = Some(NonNull::new_unchecked(node)) }
+        } else {
+            self.end = unsafe { Some(NonNull::new_unchecked(node)) };
+        }
+        target_node.next = unsafe { Some(NonNull::new_unchecked(node)) };
+    }
 }
 
 impl<T> Display for LinkedList<T>

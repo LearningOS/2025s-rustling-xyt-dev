@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -60,11 +59,12 @@ impl<T: PartialOrd + Clone> LinkedList<T> {
     }
 
     fn get_ith_node(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
+        if index < 0 { return None }
         match node {
             None => None,
             Some(next_ptr) => match index {
                 0 => Some(unsafe { &(*next_ptr.as_ptr()).val }),
-                _ => self.get_ith_node(unsafe { (*next_ptr.as_ptr()).next }, index - 1),
+                _ => self.get_ith_node(unsafe { (*next_ptr.as_ptr()).next }, index - 1), // wtf?
             },
         }
     }
