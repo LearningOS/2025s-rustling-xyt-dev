@@ -83,7 +83,7 @@ impl<T> LinkedList<T> {
                 let prevr = unsafe { (*r.as_ptr()).prev };
                 // 交换节点
                 unsafe { self.swap(&mut (*l.as_ptr()), &mut (*r.as_ptr())) };
-                if unsafe {!(*r.as_ptr()).next.is_none() && (*r.as_ptr()).next.unwrap().as_ptr() == l.as_ptr()} {
+                if unsafe {(*r.as_ptr()).next.unwrap().as_ptr() == l.as_ptr()} {
                     return
                 }
                 // 更新 l 和 r
