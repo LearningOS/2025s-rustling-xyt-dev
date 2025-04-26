@@ -17,8 +17,8 @@ fn sort<T: Ord>(array: &mut [T]){
 }
 fn heapify<T: Ord>(array: &mut [T], root: usize, len: usize) {
     let mut largest = root;
-    let left = root + 1;
-    let right = root + 2;
+    let left = 2 * root + 1;
+    let right = 2 * root + 2;
     if left < len && array[left] > array[largest] {
         largest = left;
     }
